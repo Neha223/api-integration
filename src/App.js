@@ -1,8 +1,7 @@
 import React,{Component} from 'react';
-import logo from './logo.svg';
 import './App.css';
-import { userAPI } from './api/userAPI';
-import { UserTable, LoadButton } from './components';
+import { OrderTable } from './components/OrderTable';
+import { ProductTable } from './components/ProductTable';
 
 class App extends Component {
 
@@ -11,7 +10,10 @@ class App extends Component {
 
     this.state = {
       data:[],
-      header: []
+      header: [],
+      title: "",
+      isOrderBtnActive: false,
+      isProductBtnActive: false
     };
 
     this.onLoadProductTables = this.onLoadProductTables.bind(this);
@@ -25,34 +27,37 @@ class App extends Component {
       console.log(data);
       this.setState({
         data:data,
-        header: ['Order Key','Status','Total AMount','Item Count']
+        header: ['Order Key','Status','Total Amount','Item Count'],
+        title: 'Orders',
+        isOrderBtnActive: true,
+        isProductBtnActive: false
       });
     });
    
   }
   onLoadProductTables() {
 
-    userAPI.fetchUsers()
-      .then((users) => {
-        this.setState({
-          users,
-        })
+    fetch(' https://indianwebspace.com/wp-json/wc/v3/products?consumer_key=ck_3bff9b6fde5bf86ab8d995cac18da654dc753c3b&consumer_secret=cs_0453f9ddb434bfa44567a5f9ead17ee4ca428bb2')
+    .then(response => response.json())
+    .then((data) => {
+      console.log(data);
+      this.setState({
+        data:data,
+        header: ['Order Key','Status','Total Amount','Item Count'],
+        title: 'Products',
+        isProductBtnActive: true,
+        isOrderBtnActive: false
       });
+    });
   }
 
   render() {
     return (
       <div>
-        <LoadButton
-          onLoad={this.onLoadProductTables}
-          title="Products"
-        />
-        <LoadButton
-          onLoad={this.onLoadOrderTables}
-          title="Orders"
-        />
+        <button className={ this.state.isProductBtnActive == true ? 'load-button active' : 'load-button'} onClick={this.onLoadProductTables}>Products</button>
+        <button className={ this.state.isOrderBtnActive == true ? 'load-button active' : 'load-button'} onClick={this.onLoadOrderTables}>Orders</button>
         <div>
-          <UserTable users={this.state.data} fields={this.state.header}/>          
+          {this.state.title == 'Orders' ? <OrderTable data={this.state.data}/> : this.state.title == 'Products' ? <ProductTable data={this.state.data}/> : <div style={{padding:"80px",textAlign: 'center',fontWeight:"bold"}}>Please click on buttons to display data</div>}
         </div>
       </div>
     );
